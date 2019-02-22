@@ -84,6 +84,10 @@ El programa AdafruitDHT requereix dos paràmetres, el primer és el tipus de sen
 
 ## Connectar un LED a la Raspberry.
 
+Un LED és un dispositiu electrònic que només deixa passar la llum en un sentit, i que quan passa llum emeteix una senyal lluminosa. Té dos connexions, el positiu es diu ànode i el negatiu càtode.
+
+![Anode_Catode](https://www.build-electronic-circuits.com/wp-content/uploads/2014/05/LED-anatomy-1024x455.png "Aànode i Càtode d'un LED")
+
 
 Connectar el ànode del LED (pota llarga) a la sortida de 3.3V de la Raspberry (Pin 1) i afegir una resistència de  270R a 330R (amb més resistència farà poca llum)  i entre el càtode del LED (pota curta) i la terra (Pin 6). Si connectem el LED a l'inreves no farà llum.
 
