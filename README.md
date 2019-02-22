@@ -29,7 +29,7 @@ Un cop habilitada la càmara, ja la podem provar. La comanda per fer una foto é
 
 
 
-## Càmera de la Raspberry
+### Càmera de la Raspberry
 
 Connectar la càmara a la RaspBerry amb el cable. La part blava va a l'interior i la part on es veuen els connectors ha d'estar a la banda del port HDMI. Primer cal axecar la peça blanca que fixarà el cable, posar-lo i despres fixar-lo baixant la peça blanca.
 
@@ -54,7 +54,7 @@ Si es vol fer un timelapse cal posar una entrada al crontab per tal que faci les
 
 
 
-## GPIO de la Raspberry
+### GPIO de la Raspberry
 
 La Raspberry disposa de 40 pins per entrada i sortida, anomenats GPIO (general-purpose input/output) que tenen aquestes funcions:
 
@@ -62,7 +62,7 @@ La Raspberry disposa de 40 pins per entrada i sortida, anomenats GPIO (general-p
 
 
 
-## Connectar DHT22
+### Connectar DHT22
 
 Per connectar aquest sensor cal una resistència d'entre 4.7K a 10k
 
@@ -82,7 +82,7 @@ sudo ./AdafruitDHT.py 22 4
 El programa AdafruitDHT requereix dos paràmetres, el primer és el tipus de sensor utilitzat (22 per DHT22) i el segon el pin GPIO on es troba connectat (Pin 7 GPIO 4). Si es volen enregistrar les dades, millor fer dos o tres mesures abans de prendre la mesura a enregistrar, ja que les primeres mesures mostren més variabilitat.
 
 
-## Connectar un LED a la Raspberry.
+### Connectar un LED a la Raspberry.
 
 Un LED és un dispositiu electrònic que només deixa passar la llum en un sentit, i que quan passa llum emeteix una senyal lluminosa. Té dos connexions, el positiu es diu ànode i el negatiu càtode.
 
@@ -108,7 +108,7 @@ raspi-gpio set 17 dh
 raspi-gpio set 17 dl
 ```
 
-## Controlar una tira de LED amb un relé d'estat sólid.
+### Controlar una tira de LED amb un relé d'estat sólid.
 
 Cal connectar el negatiu de la tira de led al negatiu del adaptador de 12V i el positiu del adaptador al negatiu del relé d'estat sòlid. El positiu del relé es connecta al positiu de la tira de led.
 
@@ -201,6 +201,71 @@ for filename in camera.capture_continuous('TimeLapse{counter:03d}.jpg'):
 
 ```
 
+
+
+### Mysql a la RaspBerry
+
+```
+sudo apt-get install mysql-server python-mysqldb
+```
+
+Cal entrar a la BD com a root, per això hem de utilitzar sudo per canviar a l'usuari root i des d'allí entrar en MySQL. Per no haver de fer això cada cop crearem un usuari específic per treballar amb la BD.
+
+```
+sudo su
+mysql
+
+CREATE DATABASE sensors;
+USE sensors;
+
+CREATE USER monitor@localhost IDENTIFIED BY 'potspassar';
+GRANT ALL PRIVILEGES ON sensors.* TO monitor@localhost;
+FLUSH PRIVILEGES;
+quit
+```
+
+Ara ja podem treballar amb l'usuari monitor
+
+```
+mysql -u monitor -p
+
+USE sensors;
+
+CREATE TABLE dades (data DATETIME, temperatura DECIMAL(5,2), humitat DECIMAL(5,2));
+
+INSERT INTO dades values(NOW(), 21.7, 95.2);
+
+```
+
+Podem fer un petit programa python per accedir a la BD.
+
+```
+#!/usr/bin/env python
+
+import MySQLdb
+
+
+db = MySQLdb.connect("localhost", "monitor", "potspassar", "sensors")
+curs=db.cursor()
+
+try:
+    curs.execute ("INSERT INTO dades values(NOW(), 21.7, 68.44)")
+
+    db.commit()
+    print "Dades actualitzades"
+    
+except:
+    print "Error: No actualitzem les dades"
+    db.rollback()
+
+
+curs.execute ("SELECT * FROM dades")
+print "\nData \t\t\tTemperatura \tHumitat \n"
+
+for reg in curs.fetchall():
+    print str(reg[0])+"\t"+str(reg[1])+"\t\t"+ str(reg[2])
+
+```
 
 
 
